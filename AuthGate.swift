@@ -36,10 +36,10 @@ enum AuthModel {
                 CCKeyDerivationPBKDF(CCPBKDFAlgorithm(kCCPBKDF2),
                                      password.map { Int8(bitPattern: $0) },
                                      password.count,
-                                     sp.map { UInt8($0) }, salt.count,
+                                     sp.bindMemory(to: UInt8.self).baseAddress!, salt.count,
                                      CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256),
                                      rounds,
-                                     dp, 32)
+                                     dp.baseAddress!, 32)
             }
         }
         precondition(status == kCCSuccess, "PBKDF2 failed")
@@ -84,11 +84,11 @@ extension String {
         var index = startIndex
         while index < endIndex {
             guard let hi = UInt8(String(self[index]), radix: 16),
-                  let lo = UInt8(String(self[index(after: index)]), radix: 16) else {
+                  let lo = UInt8(String(self[self.index(after: index)]), radix: 16) else {
                 return nil
             }
             bytes.append(hi << 4 | lo)
-            index = index(after: index)
+            index = self.index(after: index)
         }
         return Data(bytes)
     }
@@ -108,14 +108,14 @@ enum Keychain {
     static let service = "BOTBJudgesEdition.auth"
 
     static func save(_ data: Data, account: String) -> Bool {
-        SecItemDelete([kSecClass: kSecClassGenericPassword,
-                       kSecAttrService: service,
-                       kSecAttrAccount: account] as CFDictionary)
+        SecItemDelete([String(kSecClass): kSecClassGenericPassword,
+                       String(kSecAttrService): service,
+                       String(kSecAttrAccount): account] as CFDictionary)
         let attrs: [String: Any] = [kSecClass: kSecClassGenericPassword,
                                     kSecAttrService: service,
                                     kSecAttrAccount: account,
-                                    kSecValueData: data,
-                                    kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
+                                    String(kSecValueData): data,
+                                    String(kSecAttrAccessible): kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
         return SecItemAdd(attrs as CFDictionary, nil) == errSecSuccess
     }
 
@@ -123,8 +123,8 @@ enum Keychain {
         let query: [String: Any] = [kSecClass: kSecClassGenericPassword,
                                     kSecAttrService: service,
                                     kSecAttrAccount: account,
-                                    kSecReturnData: true,
-                                    kSecMatchLimit: kSecMatchLimitOne]
+                                    String(kSecReturnData): true,
+                                    String(kSecMatchLimit): kSecMatchLimitOne]
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         return status == errSecSuccess ? (item as? Data) : nil
