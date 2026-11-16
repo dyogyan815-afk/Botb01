@@ -1,19 +1,12 @@
 """Multi-judge assessment tests: schema validation, AI separation, approval gate,
 audit chain integrity, competition/image identity consistency."""
-
-import json
-import os
-import sys
-import unittest
-
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "engine"))
-
+import json, os, sys, unittest
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, ROOT)
 from crosshair_records import RecordError
 from multi_judge import (Assessment, JudgeSubmission, SchemaViolation,
                          validate_schema, validate_assessment_file)
-
-SCHEMA_PATH = os.path.join(ROOT, "schemas", "assessment.schema.json")
+SCHEMA_PATH = os.path.join(ROOT, "assessment.schema.json")
 
 
 def sub(judge="J1", x=100, y=100, note=""):
