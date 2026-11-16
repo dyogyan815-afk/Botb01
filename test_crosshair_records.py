@@ -1,14 +1,7 @@
 """Crosshair record save / reopen / verify tests."""
-
-import json
-import os
-import shutil
-import sys
-import tempfile
-import unittest
-
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "engine"))
-
+import json, os, shutil, sys, tempfile, unittest
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, ROOT)
 from coordinate_engine import ImageIdentity, PixelPoint, record_hash
 from crosshair_records import CrosshairRecord, CrosshairStore, RecordError
 
