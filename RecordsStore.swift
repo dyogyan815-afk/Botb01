@@ -32,7 +32,7 @@ struct CrosshairRecordFile: Codable {
     }
 }
 
-enum VerificationStatus: String { case pass = "PASS", fail = "FAIL" }
+enum VerificationStatus: String, Codable { case pass = "PASS", fail = "FAIL" }
 
 struct VerificationReport: Codable {
     var recordId: String
