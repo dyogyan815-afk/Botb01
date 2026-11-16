@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import UIKit
 
 struct JudgeSubmissionView: View {
     @State private var competitionId = ""
@@ -81,7 +82,7 @@ struct JudgeSubmissionView: View {
             }
         }
         .navigationTitle("Judge submission")
-        .onChange(of: photoItem) { _, newItem in
+        .onChange(of: photoItem) { newItem in
             load(imageItem: newItem)
         }
     }
