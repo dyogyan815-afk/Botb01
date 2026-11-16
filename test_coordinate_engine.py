@@ -1,16 +1,11 @@
 """Regression tests for the authoritative coordinate engine (spec section 7)."""
-
-import os
-import sys
-import unittest
-
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "engine"))
-
+import os, sys, unittest
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, ROOT)
 from coordinate_engine import (
-    CoordinateError, ImageIdentity, PixelPoint, agreement_ratio,
-    canonical_json, clamp, consensus, euclidean_distance_px,
-    evaluate_consensus, from_normalized, geometric_median_float,
-    image_sha256, normalized_distance, pairwise_max_spread,
+    CoordinateError, ImageIdentity, PixelPoint, agreement_ratio, canonical_json,
+    clamp, consensus, euclidean_distance_px, evaluate_consensus, from_normalized,
+    geometric_median_float, image_sha256, normalized_distance, pairwise_max_spread,
     per_axis_median, record_hash, roundtrip_error_px, to_normalized,
     within_tolerance, ENGINE_VERSION,
 )
