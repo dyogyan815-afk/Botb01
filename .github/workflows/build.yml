@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "*.swift"
+      - "*.py"
+      - "*.json"
       - "project.yml"
       - ".github/workflows/build.yml"
   workflow_dispatch:
