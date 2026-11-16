@@ -96,7 +96,7 @@ public enum CoordinateEngine {
         if abs(v - f) == 0.5 && diff >= 0.5 {
             // exact .5 cases: choose even neighbor
             let floorV = Foundation.floor(v)
-            let floorIsEven = Int(floorV).truncatingRemainder(dividingBy: 2) == 0
+            let floorIsEven = Int(floorV).isMultiple(of: 2)
             return Int(floorIsEven ? floorV : f)
         }
         return Int(f)
@@ -155,13 +155,13 @@ public enum CoordinateEngine {
         for _ in 0..<weiszfeldMaxIter {
             var wsum = 0.0, sx = 0.0, sy = 0.0
             for p in points {
-                let dx = Double(p.x - fx), dy = Double(p.y - fy)
+                let dx = Double(p.x) - fx, dy = Double(p.y) - fy
                 let d = max((dx * dx + dy * dy).squareRoot(), eps)
                 let w = 1.0 / d
                 wsum += w; sx += w * Double(p.x); sy += w * Double(p.y)
             }
             let nx = sx / wsum, ny = sy / wsum
-            let step = ((nx - fx) * (nx - fx) + (ny - fy) * (ny - fy)).squareRoot()
+            let step = Foundation.sqrt((nx - fx) * (nx - fx) + (ny - fy) * (ny - fy))
             fx = nx; fy = ny
             if step < weiszfeldTol { break }
         }
