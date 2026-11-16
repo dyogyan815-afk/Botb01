@@ -1,12 +1,7 @@
 """First-launch authentication model tests (PIN setup, verify, lockout)."""
-
-import os
-import sys
-import time
-import unittest
-
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "engine"))
-
+import os, sys, time, unittest
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, ROOT)
 from auth_model import (AuthError, FAILURES_BEFORE_LOCK, RateLimiter,
                         create_credential, verify_credential)
 
