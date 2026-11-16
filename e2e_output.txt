@@ -1,0 +1,8 @@
+consensus: {"method": "geometric_median", "x_px": 513, "y_px": 342, "agreement_ratio": 1.0, "max_spread_px": 8.485, "n_judges": 4}
+agreement_ratio == 1.0: True
+approval: APPROVED by project-owner
+audit chain valid: True | entries: 7
+schema validation: PASS
+schema negative control: correctly rejected -> SchemaViolation
+written: samples/sample_assessment.json | file re-validation: PASS
+assessment_hash: 542ea90b3d47b4f3712ee108ec7a18f97aaefbcbe234b6573212c24eac51d9c0

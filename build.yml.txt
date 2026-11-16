@@ -1,0 +1,93 @@
+# GitHub Actions workflow - builds the Judges Edition unsigned IPA on a
+# GitHub-hosted macOS runner. No Mac and no local Xcode needed on your side.
+#
+# This file is ALREADY in its correct location (.github/workflows/build.yml).
+#
+# HOW TO USE (owner):
+#   1. Upload this whole repo to a GitHub repository (public = free macOS runners).
+#   2. Actions tab -> "I understand my workflows, go ahead and enable them".
+#   3. Left sidebar: "Build Judges Edition IPA (unsigned)" -> Run workflow.
+#   4. Open the finished run -> Artifacts -> BOTB_Judges_Edition_unsigned_ipa
+#      (contains the .ipa + its SHA-256). Artifact is kept 90 days.
+#   5. Sign it yourself (see build/WINDOWS_SIDELOAD_GUIDE.md and
+#      SIGNING_INSTRUCTIONS.md). Signing is intentionally NOT performed here.
+#
+# The Python engine test suite runs first: if the reference engine ever fails
+# on the build machine, the build stops instead of producing a dubious IPA.
+
+name: Build Judges Edition IPA (unsigned)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Run Python engine test suite (integrity check on the build machine)
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ios/JudgesEdition
+        run: xcodegen generate
+
+      - name: Build app (UNSIGNED - owner signs later)
+        working-directory: ios/JudgesEdition
+        run: |
+          set -o pipefail
+          xcodebuild -project BOTBJudgesEdition.xcodeproj \
+            -scheme BOTBJudgesEdition \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DD \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build | tee build_log.txt
+          test -d "build/DD/Build/Products/Release-iphoneos/BOTBJudgesEdition.app"
+
+      - name: Verify Info.plist and package IPA
+        working-directory: ios/JudgesEdition
+        run: |
+          APP="build/DD/Build/Products/Release-iphoneos/BOTBJudgesEdition.app"
+          plutil -lint "$APP/Info.plist"
+          BID=$(plutil -extract CFBundleIdentifier raw "$APP/Info.plist")
+          VER=$(plutil -extract CFBundleShortVersionString raw "$APP/Info.plist")
+          echo "Bundle identifier: $BID"
+          echo "Bundle version    : $VER"
+          rm -rf Payload BOTB_Judges_Edition.ipa
+          mkdir -p Payload
+          cp -R "$APP" Payload/
+          zip -qyr BOTB_Judges_Edition.ipa Payload
+          rm -rf Payload
+          unzip -l BOTB_Judges_Edition.ipa | head -15
+          shasum -a 256 BOTB_Judges_Edition.ipa | tee IPA_SHA256.txt
+
+      - name: Upload build log (always, even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build_log
+          path: ios/JudgesEdition/build_log.txt
+          if-no-files-found: ignore
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: BOTB_Judges_Edition_unsigned_ipa
+          path: |
+            ios/JudgesEdition/BOTB_Judges_Edition.ipa
+            ios/JudgesEdition/IPA_SHA256.txt
+          retention-days: 90

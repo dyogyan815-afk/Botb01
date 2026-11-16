@@ -1,0 +1,155 @@
+{
+ "assessment_id": "A-SAMPLE-001",
+ "competition_id": "BOTB-2026-R1",
+ "image_id": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca7c2de8",
+ "consensus_method": "geometric_median",
+ "tolerance_px": 12.0,
+ "judges": [
+  {
+   "judge_id": "JUDGE-01",
+   "crosshair": {
+    "x_px": 512,
+    "y_px": 340,
+    "image_width_px": 1024,
+    "image_height_px": 768
+   },
+   "submitted_at": "2026-11-16T00:25:58Z",
+   "note": "crosshair adjusted after reopen"
+  },
+  {
+   "judge_id": "JUDGE-02",
+   "crosshair": {
+    "x_px": 515,
+    "y_px": 344,
+    "image_width_px": 1024,
+    "image_height_px": 768
+   },
+   "submitted_at": "2026-11-16T00:25:58Z",
+   "note": "crosshair adjusted after reopen"
+  },
+  {
+   "judge_id": "JUDGE-03",
+   "crosshair": {
+    "x_px": 509,
+    "y_px": 338,
+    "image_width_px": 1024,
+    "image_height_px": 768
+   },
+   "submitted_at": "2026-11-16T00:25:58Z",
+   "note": "crosshair adjusted after reopen"
+  },
+  {
+   "judge_id": "JUDGE-04",
+   "crosshair": {
+    "x_px": 513,
+    "y_px": 342,
+    "image_width_px": 1024,
+    "image_height_px": 768
+   },
+   "submitted_at": "2026-11-16T00:25:58Z",
+   "note": "crosshair adjusted after reopen"
+  }
+ ],
+ "consensus": {
+  "method": "geometric_median",
+  "x_px": 513,
+  "y_px": 342,
+  "raw_x": 512.839026,
+  "raw_y": 341.70709,
+  "engine_version": "1.0.0",
+  "tolerance_px": 12.0,
+  "max_spread_px": 8.485,
+  "agreement_ratio": 1.0,
+  "n_judges": 4
+ },
+ "approval": {
+  "status": "APPROVED",
+  "approver": "project-owner",
+  "decided_at": "2026-11-16T00:25:58Z"
+ },
+ "ai_proposals": [
+  {
+   "x_px": 511,
+   "y_px": 341,
+   "model": "reference-proposal-v0",
+   "confidence": 0.82,
+   "proposal_id": "22e15ae157ff5fa08e1009eaf262b1e36b16a02eeb768957e2027611d4487677"
+  }
+ ],
+ "audit": [
+  {
+   "timestamp": "2026-11-16T00:25:58Z",
+   "actor": "system",
+   "action": "assessment_created",
+   "details": {
+    "assessment_id": "A-SAMPLE-001",
+    "competition_id": "BOTB-2026-R1",
+    "image_id": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca7c2de8"
+   },
+   "prev_entry_hash": "GENESIS",
+   "entry_hash": "c684aef917fcf9138b30d91f105fc0299b3a67c445dcc4ec398f9220ea875261"
+  },
+  {
+   "timestamp": "2026-11-16T00:25:58Z",
+   "actor": "JUDGE-01",
+   "action": "judge_submission_added",
+   "details": {
+    "judge_id": "JUDGE-01"
+   },
+   "prev_entry_hash": "c684aef917fcf9138b30d91f105fc0299b3a67c445dcc4ec398f9220ea875261",
+   "entry_hash": "34e7b3f03a26b65927b67725418ca56333fc255656ec0ed9a441bdc26f362fd3"
+  },
+  {
+   "timestamp": "2026-11-16T00:25:58Z",
+   "actor": "JUDGE-02",
+   "action": "judge_submission_added",
+   "details": {
+    "judge_id": "JUDGE-02"
+   },
+   "prev_entry_hash": "34e7b3f03a26b65927b67725418ca56333fc255656ec0ed9a441bdc26f362fd3",
+   "entry_hash": "9f0e7927b660d37a374c9db187cf0db48c658c6b70745c7306002635c51c1fd2"
+  },
+  {
+   "timestamp": "2026-11-16T00:25:58Z",
+   "actor": "JUDGE-03",
+   "action": "judge_submission_added",
+   "details": {
+    "judge_id": "JUDGE-03"
+   },
+   "prev_entry_hash": "9f0e7927b660d37a374c9db187cf0db48c658c6b70745c7306002635c51c1fd2",
+   "entry_hash": "a425b8cd57eadf59c60c80691e608d95c37c47468f4a290f967c16ca77675cb0"
+  },
+  {
+   "timestamp": "2026-11-16T00:25:58Z",
+   "actor": "JUDGE-04",
+   "action": "judge_submission_added",
+   "details": {
+    "judge_id": "JUDGE-04"
+   },
+   "prev_entry_hash": "a425b8cd57eadf59c60c80691e608d95c37c47468f4a290f967c16ca77675cb0",
+   "entry_hash": "50f28612bbbbe087b689f4d5cffaa543868b7b9c70ff1fe6ed30a35d73fc0298"
+  },
+  {
+   "timestamp": "2026-11-16T00:25:58Z",
+   "actor": "system",
+   "action": "ai_proposal_registered",
+   "details": {
+    "proposal_id": "22e15ae157ff5fa08e1009eaf262b1e36b16a02eeb768957e2027611d4487677"
+   },
+   "prev_entry_hash": "50f28612bbbbe087b689f4d5cffaa543868b7b9c70ff1fe6ed30a35d73fc0298",
+   "entry_hash": "03a9348d2afafccbe1944bda81aa4ec704ba7e58f995e55ee6819bcf6b6a77bf"
+  },
+  {
+   "timestamp": "2026-11-16T00:25:58Z",
+   "actor": "project-owner",
+   "action": "approval_approved",
+   "details": {
+    "approver": "project-owner"
+   },
+   "prev_entry_hash": "03a9348d2afafccbe1944bda81aa4ec704ba7e58f995e55ee6819bcf6b6a77bf",
+   "entry_hash": "2103a75e639587fbd545c20d4d2c1314a3a664e30c362d676f460e8318ba030a"
+  }
+ ],
+ "engine_version": "1.0.0",
+ "assessment_hash": "542ea90b3d47b4f3712ee108ec7a18f97aaefbcbe234b6573212c24eac51d9c0"
+}

@@ -1,0 +1,55 @@
+test_pin_policy (test_auth_model.TestCredentialLifecycle.test_pin_policy) ... ok
+test_salts_unique_per_setup (test_auth_model.TestCredentialLifecycle.test_salts_unique_per_setup) ... ok
+test_setup_then_unlock (test_auth_model.TestCredentialLifecycle.test_setup_then_unlock) ... ok
+test_verifier_never_stores_pin (test_auth_model.TestCredentialLifecycle.test_verifier_never_stores_pin) ... ok
+test_wrong_pin_rejected (test_auth_model.TestCredentialLifecycle.test_wrong_pin_rejected) ... ok
+test_backoff_grows (test_auth_model.TestRateLimiter.test_backoff_grows) ... ok
+test_lockout_after_consecutive_failures (test_auth_model.TestRateLimiter.test_lockout_after_consecutive_failures) ... ok
+test_success_resets (test_auth_model.TestRateLimiter.test_success_resets) ... ok
+test_two_rate_limiters_independent (test_auth_model.TestRateLimiter.test_two_rate_limiters_independent) ... ok
+test_agreement_ratio_and_gate (test_coordinate_engine.TestConsensus.test_agreement_ratio_and_gate) ... ok
+test_empty_and_unknown_method (test_coordinate_engine.TestConsensus.test_empty_and_unknown_method) ... ok
+test_outlier_robustness (test_coordinate_engine.TestConsensus.test_outlier_robustness) ... ok
+test_per_axis_median_even_count (test_coordinate_engine.TestConsensus.test_per_axis_median_even_count) ... ok
+test_single_point (test_coordinate_engine.TestConsensus.test_single_point) ... ok
+test_symmetric_square_geometric_median_is_center (test_coordinate_engine.TestConsensus.test_symmetric_square_geometric_median_is_center) ... ok
+test_clamp_and_rejection (test_coordinate_engine.TestConversions.test_clamp_and_rejection) ... ok
+test_identity_points (test_coordinate_engine.TestConversions.test_identity_points) ... ok
+test_non_integer_pixel_rejected (test_coordinate_engine.TestConversions.test_non_integer_pixel_rejected) ... ok
+test_roundtrip_error_bounded (test_coordinate_engine.TestConversions.test_roundtrip_error_bounded) ... ok
+test_canonical_serialization_is_stable (test_coordinate_engine.TestDeterminismAndIdentity.test_canonical_serialization_is_stable) ... ok
+test_engine_version_format (test_coordinate_engine.TestDeterminismAndIdentity.test_engine_version_format) ... ok
+test_image_identity_content_based (test_coordinate_engine.TestDeterminismAndIdentity.test_image_identity_content_based) ... ok
+test_345_triangle (test_coordinate_engine.TestDistances.test_345_triangle) ... ok
+test_normalized_distance_uses_diagonal (test_coordinate_engine.TestDistances.test_normalized_distance_uses_diagonal) ... ok
+test_spread (test_coordinate_engine.TestDistances.test_spread) ... ok
+test_bounds_and_validation (test_crosshair_records.TestSaveReopenVerify.test_bounds_and_validation) ... ok
+test_identity_consistency (test_crosshair_records.TestSaveReopenVerify.test_identity_consistency) ... ok
+test_listing_and_filtering (test_crosshair_records.TestSaveReopenVerify.test_listing_and_filtering) ... ok
+test_record_id_is_content_hash (test_crosshair_records.TestSaveReopenVerify.test_record_id_is_content_hash) ... ok
+test_save_then_reopen_roundtrip (test_crosshair_records.TestSaveReopenVerify.test_save_then_reopen_roundtrip) ... ok
+test_tamper_detection (test_crosshair_records.TestSaveReopenVerify.test_tamper_detection) ... ok
+test_verify_passes_on_untouched_record (test_crosshair_records.TestSaveReopenVerify.test_verify_passes_on_untouched_record) ... ok
+test_approval_passes_when_all_agree (test_multi_judge.TestApprovalGate.test_approval_passes_when_all_agree) ... ok
+test_approval_requires_full_agreement (test_multi_judge.TestApprovalGate.test_approval_requires_full_agreement) ... ok
+test_invalid_status_rejected (test_multi_judge.TestApprovalGate.test_invalid_status_rejected) ... ok
+test_chain_links (test_multi_judge.TestAuditChainAndIntegrity.test_chain_links) ... ok
+test_chain_valid_and_tamper_detected (test_multi_judge.TestAuditChainAndIntegrity.test_chain_valid_and_tamper_detected) ... ok
+test_first_launch_identity_fields (test_multi_judge.TestAuditChainAndIntegrity.test_first_launch_identity_fields) ... ok
+test_roundtrip_preserves_content_and_detects_mutation (test_multi_judge.TestAuditChainAndIntegrity.test_roundtrip_preserves_content_and_detects_mutation) ... ok
+test_ai_cannot_become_a_judge (test_multi_judge.TestJudgeWorkflow.test_ai_cannot_become_a_judge) ... ok
+test_ai_proposals_are_separate (test_multi_judge.TestJudgeWorkflow.test_ai_proposals_are_separate) ... ok
+test_consensus_recomputed_on_submission (test_multi_judge.TestJudgeWorkflow.test_consensus_recomputed_on_submission) ... ok
+test_duplicate_judge_rejected (test_multi_judge.TestJudgeWorkflow.test_duplicate_judge_rejected) ... ok
+test_mixed_image_sizes_rejected (test_multi_judge.TestJudgeWorkflow.test_mixed_image_sizes_rejected) ... ok
+test_additional_properties_fails (test_multi_judge.TestSchemaValidation.test_additional_properties_fails) ... ok
+test_bad_enum_fails (test_multi_judge.TestSchemaValidation.test_bad_enum_fails) ... ok
+test_bad_image_id_fails (test_multi_judge.TestSchemaValidation.test_bad_image_id_fails) ... ok
+test_missing_required_fails (test_multi_judge.TestSchemaValidation.test_missing_required_fails) ... ok
+test_valid_document_passes (test_multi_judge.TestSchemaValidation.test_valid_document_passes) ... ok
+test_validate_assessment_file_helper (test_multi_judge.TestSchemaValidation.test_validate_assessment_file_helper) ... ok
+
+----------------------------------------------------------------------
+Ran 50 tests in 0.122s
+
+OK
