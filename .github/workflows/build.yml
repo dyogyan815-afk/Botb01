@@ -1,0 +1,86 @@
+name: Build BOTB Judges Edition unsigned IPA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*.swift"
+      - "project.yml"
+      - ".github/workflows/build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Apple toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Run Python regression tests
+        run: python3 -m unittest discover -s . -p "test_*.py" -v
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project from root Swift sources
+        run: xcodegen generate --spec project.yml
+
+      - name: Build unsigned iOS app
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project BOTBJudgesEdition.xcodeproj \
+            -scheme BOTBJudgesEdition \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build | tee build_log.txt
+          test -d "build/DerivedData/Build/Products/Release-iphoneos/BOTBJudgesEdition.app"
+
+      - name: Package and verify unsigned IPA
+        run: |
+          set -euo pipefail
+          APP="build/DerivedData/Build/Products/Release-iphoneos/BOTBJudgesEdition.app"
+          plutil -lint "$APP/Info.plist"
+          BID=$(plutil -extract CFBundleIdentifier raw "$APP/Info.plist")
+          VER=$(plutil -extract CFBundleShortVersionString raw "$APP/Info.plist")
+          test "$BID" = "com.botb.judges.edition"
+          echo "Bundle ID: $BID"
+          echo "Version: $VER"
+          mkdir -p Payload
+          cp -R "$APP" Payload/
+          /usr/bin/zip -qry BOTB_Judges_Edition_unsigned.ipa Payload
+          rm -rf Payload
+          unzip -t BOTB_Judges_Edition_unsigned.ipa
+          shasum -a 256 BOTB_Judges_Edition_unsigned.ipa | tee IPA_SHA256.txt
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build_log
+          path: build_log.txt
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Upload unsigned IPA
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BOTB_Judges_Edition_unsigned_ipa
+          path: |
+            BOTB_Judges_Edition_unsigned.ipa
+            IPA_SHA256.txt
+          retention-days: 90
