@@ -63,7 +63,7 @@ struct AssessmentRow: View {
     private var consensusText: String {
         guard let c = assessment.consensus else { return "no consensus" }
         let x = c["x_px"]?.doubleValue.map { String($0) } ?? "?"
-        let y = c["y_px"]?.doubleValue.map(String.init) ?? "?"
+        let y = c["y_px"]?.doubleValue.map { String($0) } ?? "?"
         let ratio = c["agreement_ratio"]?.doubleValue ?? 0
         return "consensus (\(x), \(y)) px  |  agreement \(String(format: "%.0f%%", ratio * 100))"
     }
