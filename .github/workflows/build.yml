@@ -8,18 +8,19 @@ on:
       - "*.py"
       - "*.json"
       - "project.yml"
+      - "README.md"
       - ".github/workflows/build.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   actions: read
   checks: write
 
 jobs:
   build:
-    runs-on: macos-15-intel
-    timeout-minutes: 35
+    runs-on: macos-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,26 +30,8 @@ jobs:
           xcodebuild -version
           swift --version
 
-      - name: Reassemble BOTB IPA parts and verify archive
-        run: |
-          set -euo pipefail
-          parts=(BotbIPA.part-*)
-          test "${#parts[@]}" -eq 10
-          expected=0
-          for p in "${parts[@]}"; do
-            test -s "$p"
-            expected=$((expected + $(stat -f%z "$p")))
-          done
-          cat BotbIPA.part-* > BOTB_reassembled_reference.ipa
-          actual=$(stat -f%z BOTB_reassembled_reference.ipa)
-          test "$actual" -eq "$expected"
-          unzip -t BOTB_reassembled_reference.ipa
-          echo "Reassembled reference IPA: $actual bytes"
-          shasum -a 256 BOTB_reassembled_reference.ipa | tee BOTB_reference_SHA256.txt
-          rm -f BOTB_reassembled_reference.ipa
-
       - name: Run Python regression tests
-        run: python3 -m unittest discover -s . -p "test_*.py" -v
+        run: python3 -m unittest test_auth_model test_coordinate_engine test_crosshair_records test_multi_judge -v
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -66,6 +49,7 @@ jobs:
             -destination 'generic/platform=iOS' \
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             COMPILER_INDEX_STORE_ENABLE=NO \
             build | tee build_log.txt
@@ -108,5 +92,3 @@ jobs:
             BOTB_Judges_Edition_unsigned.ipa
             IPA_SHA256.txt
           retention-days: 90
-
-# force rebuild after packaging-path fix

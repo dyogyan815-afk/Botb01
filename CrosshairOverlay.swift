@@ -34,34 +34,13 @@ struct CrosshairOverlay: View {
 
     var body: some View {
         ZStack {
-            // Other judges' markers
             ForEach(Array(otherJudges.enumerated()), id: \.offset) { _, p in
-                let o = displayOffset(p)
-                Circle()
-                    .stroke(Color.blue.opacity(0.55), lineWidth: 1.5)
-                    .frame(width: 14, height: 14)
-                    .position(o)
+                MarkerDot(at: displayOffset(p))
             }
-            // Consensus marker
             if let c = consensusPoint {
-                let o = displayOffset(c)
-                Image(systemName: "scope")
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundStyle(.green)
-                    .position(o)
+                ConsensusMarker(at: displayOffset(c))
             }
-            // Authoritative judge crosshair
-            let o = displayOffset(point)
-            CrosshairShape()
-                .stroke(Color.red, lineWidth: 2)
-                .frame(width: 40, height: 40)
-                .position(o)
-            Text("\(point.x), \(point.y) px")
-                .font(.caption.monospaced())
-                .padding(4)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 4))
-                .offset(x: 0, y: 34)
-                .position(x: o.x, y: max(24, o.y - 34))
+            ActiveCrosshair(at: displayOffset(point), label: "\(point.x), \(point.y) px")
         }
         .contentShape(Rectangle())
         .gesture(
@@ -70,20 +49,55 @@ struct CrosshairOverlay: View {
                     if dragStart == nil { dragStart = point }
                     var candidate = pixel(from: value.location)
                     if fineAdjust, let start = dragStart {
-                        // fine mode: move at most 1 px per 4 display points
-                        let raw = pixel(from: value.location)
                         let dx = Double(value.location.x - value.startLocation.x)
                         let dy = Double(value.location.y - value.startLocation.y)
                         candidate = CoordinateEngine.PixelPoint(
                             x: start.x + Int(dx / 4).clamped(-25...25),
                             y: start.y + Int(dy / 4).clamped(-25...25))
-                        _ = raw
                     }
                     point = candidate
                 }
                 .onEnded { _ in dragStart = nil }
         )
         .onLongPressGesture(minimumDuration: 0.4) { fineAdjust.toggle() }
+    }
+}
+
+private struct MarkerDot: View {
+    let at: CGPoint
+    var body: some View {
+        Circle()
+            .stroke(Color.blue.opacity(0.55), lineWidth: 1.5)
+            .frame(width: 14, height: 14)
+            .position(at)
+    }
+}
+
+private struct ConsensusMarker: View {
+    let at: CGPoint
+    var body: some View {
+        Image(systemName: "scope")
+            .font(.system(size: 26, weight: .bold))
+            .foregroundStyle(.green)
+            .position(at)
+    }
+}
+
+private struct ActiveCrosshair: View {
+    let at: CGPoint
+    let label: String
+    var body: some View {
+        ZStack {
+            CrosshairShape()
+                .stroke(Color.red, lineWidth: 2)
+                .frame(width: 40, height: 40)
+                .position(at)
+            Text(label)
+                .font(.caption.monospaced())
+                .padding(4)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 4))
+                .position(x: at.x, y: max(CGFloat(24), at.y - 34))
+        }
     }
 }
 

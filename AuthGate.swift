@@ -8,7 +8,7 @@
 //   - exponential lockout after consecutive failures
 
 import SwiftUI
-import CommonCrypto
+import CryptoKit
 import Security
 
 enum AuthModel {
@@ -30,20 +30,18 @@ enum AuthModel {
     }
 
     static func pbkdf2(password: Data, salt: Data, rounds: UInt32) -> Data {
-        var derived = [UInt8](repeating: 0, count: 32)
-        let status = derived.withUnsafeMutableBytes { dp in
-            salt.withUnsafeBytes { sp in
-                CCKeyDerivationPBKDF(CCPBKDFAlgorithm(kCCPBKDF2),
-                                     password.map { Int8(bitPattern: $0) },
-                                     password.count,
-                                     sp.bindMemory(to: UInt8.self).baseAddress!, salt.count,
-                                     CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256),
-                                     rounds,
-                                     dp.baseAddress!, 32)
+        let key = SymmetricKey(data: password)
+        var block = Data(salt)
+        block.append(contentsOf: [0, 0, 0, 1])
+        var u = Data(HMAC<SHA256>.authenticationCode(for: block, using: key))
+        var t = [UInt8](u)
+        if rounds > 1 {
+            for _ in 1..<Int(rounds) {
+                u = Data(HMAC<SHA256>.authenticationCode(for: u, using: key))
+                for i in t.indices { t[i] ^= u[i] }
             }
         }
-        precondition(status == kCCSuccess, "PBKDF2 failed")
-        return Data(derived)
+        return Data(t)
     }
 
     static func createCredential(pin: String) throws -> Credential {
@@ -66,7 +64,6 @@ enum AuthModel {
               let expData = credential.verifierHex.hexDecoded else { return false }
         let candidate = pbkdf2(password: Data(pin.utf8), salt: saltData,
                                rounds: credential.iterations)
-        // constant-time comparison
         guard candidate.count == expData.count else { return false }
         var diff: UInt8 = 0
         for (a, b) in zip(candidate, expData) { diff |= a ^ b }
@@ -77,18 +74,15 @@ enum AuthModel {
 extension String {
     /// Decodes a lowercase hex string into Data.
     var hexDecoded: Data? {
-        guard count % 2 == 0,
-              allSatisfy({ $0.isHexDigit }) else { return nil }
+        guard count % 2 == 0, allSatisfy({ $0.isHexDigit }) else { return nil }
         var bytes = [UInt8]()
         bytes.reserveCapacity(count / 2)
         var index = startIndex
         while index < endIndex {
-            guard let hi = UInt8(String(self[index]), radix: 16),
-                  let lo = UInt8(String(self[self.index(after: index)]), radix: 16) else {
-                return nil
-            }
-            bytes.append(hi << 4 | lo)
-            index = self.index(after: index)
+            let next = self.index(index, offsetBy: 2)
+            guard let byte = UInt8(self[index..<next], radix: 16) else { return nil }
+            bytes.append(byte)
+            index = next
         }
         return Data(bytes)
     }
