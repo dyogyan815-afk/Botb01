@@ -1,0 +1,88 @@
+name: Inspect shared Drive recovery ZIP
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/inspect-drive-zip.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: inspect-drive-recovery
+  cancel-in-progress: false
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install public Drive downloader
+        run: python -m pip install gdown==5.2.0
+      - name: Download ZIP and read only expected report files
+        shell: python
+        run: |
+          import json, os, pathlib, re, subprocess, tempfile, zipfile
+          result = {'status': 'not_inspected', 'source': 'user_shared_drive_zip', 'report_claims_independently_verified_against_ipa': False, 'seven_judge_binary_integration': 'NOT PERFORMED'}
+          with tempfile.TemporaryDirectory() as tmp:
+              archive = pathlib.Path(tmp) / 'input.zip'
+              try:
+                  process = subprocess.run(['gdown', '1WWVDDVqcbhOch0Jf_xpIw09aonRZTQ_L', '-O', str(archive)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=420)
+                  if process.returncode != 0 or not archive.is_file():
+                      raise RuntimeError('download_failed_check_drive_sharing_or_quota')
+                  with zipfile.ZipFile(archive) as z:
+                      entries = z.infolist()
+                      if len(entries) > 20000:
+                          raise RuntimeError('too_many_zip_entries')
+                      expected = ['INSPECTION.json', 'PROJECT_ZIP_ENTRIES.txt']
+                      found = {}
+                      for base in expected:
+                          matches = [i for i in entries if pathlib.PurePosixPath(i.filename).name == base and not i.is_dir()]
+                          if len(matches) != 1 or matches[0].file_size > 2000000:
+                              raise RuntimeError('missing_duplicate_or_oversized_expected_report')
+                          found[base] = z.read(matches[0])
+                      data = json.loads(found['INSPECTION.json'])
+                      if not isinstance(data, dict):
+                          raise RuntimeError('invalid_inspection_report')
+                      size = data.get('ipa_bytes')
+                      if type(size) is int and 0 <= size <= 10000000000:
+                          result['reported_ipa_bytes'] = size
+                      bundles = data.get('bundles', {})
+                      result['reported_bundles'] = []
+                      if isinstance(bundles, dict):
+                          for bundle in list(bundles.values())[:20]:
+                              if not isinstance(bundle, dict):
+                                  continue
+                              clean = {}
+                              for key in ['CFBundleIdentifier', 'CFBundleShortVersionString', 'MinimumOSVersion']:
+                                  value = bundle.get(key)
+                                  if isinstance(value, str) and re.fullmatch(r'[A-Za-z0-9_.-]{1,120}', value):
+                                      clean[key] = value
+                              result['reported_bundles'].append(clean)
+                      source = data.get('source_entries', [])
+                      if isinstance(source, list):
+                          result['reported_ipa_source_entry_count'] = len(source)
+                      listing = found['PROJECT_ZIP_ENTRIES.txt'].decode('utf-8').splitlines()
+                      result['project_zip_entry_count'] = len(listing)
+                      result['project_zip_swift_file_count'] = sum(n.endswith('.swift') for n in listing)
+                      result['project_zip_xcode_project_file_count'] = sum(n.endswith('project.pbxproj') for n in listing)
+                      result['status'] = 'expected_reports_read_successfully'
+              except Exception as error:
+                  result['status'] = 'inspection_failed'
+                  result['error_type'] = type(error).__name__
+          out = pathlib.Path('inspection')
+          out.mkdir(exist_ok=True)
+          text = json.dumps(result, indent=2) + '\n'
+          (out / 'drive-zip-report.json').write_text(text)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('## Limited Drive ZIP diagnostic\n```json\n' + text + '```\nNo IPA modification was performed.\n')
+      - name: Commit limited diagnostic only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- inspection/drive-zip-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record limited Drive ZIP inspection results'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
