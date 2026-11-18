@@ -108,3 +108,5 @@ jobs:
             BOTB_Judges_Edition_unsigned.ipa
             IPA_SHA256.txt
           retention-days: 90
+
+# force rebuild after packaging-path fix
