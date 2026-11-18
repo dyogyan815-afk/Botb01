@@ -1,0 +1,67 @@
+name: Test SevenJudgePanel core
+on:
+  push:
+    branches: [main]
+    paths: ['CoordinateEngine.swift', 'SevenJudgePanel.swift', 'SevenJudgePanelChecks.swift', '.github/workflows/test-seven-judges.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: seven-judge-core-results
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and execute native Swift checks
+        shell: python
+        run: |
+          import json, os, pathlib, subprocess
+          source = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          report = {'source_commit': source, 'scope': 'SevenJudgePanel core and persistence only; no iOS UI or large IPA integration test', 'status': 'not_run'}
+          logs = []
+          binary = str(pathlib.Path(os.environ['RUNNER_TEMP']) / 'seven-judge-checks')
+          try:
+              version = subprocess.run(['swiftc', '--version'], capture_output=True, text=True, timeout=30)
+              report['swift_version'] = version.stdout.strip()
+              compiled = subprocess.run(['swiftc', 'CoordinateEngine.swift', 'SevenJudgePanel.swift', 'SevenJudgePanelChecks.swift', '-o', binary], capture_output=True, text=True, timeout=300)
+              report['compile_exit_code'] = compiled.returncode
+              logs.append('COMPILE\n' + compiled.stdout + compiled.stderr)
+              if compiled.returncode == 0:
+                  executed = subprocess.run([binary], capture_output=True, text=True, timeout=120)
+                  report['test_exit_code'] = executed.returncode
+                  report['status'] = 'passed' if executed.returncode == 0 else 'tests_failed'
+                  logs.append('TEST EXECUTION\n' + executed.stdout + executed.stderr)
+              else:
+                  report['status'] = 'compile_failed'
+          except Exception as error:
+              report['status'] = 'runner_error'
+              report['error_type'] = type(error).__name__
+          out = pathlib.Path('verification/seven-judges')
+          out.mkdir(parents=True, exist_ok=True)
+          text = json.dumps(report, indent=2) + '\n'
+          (out / 'result.json').write_text(text)
+          (out / 'test-log.txt').write_text('\n'.join(logs)[-40000:])
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('## Seven-judge core checks\n```json\n' + text + '```\n')
+      - name: Save actual test evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- verification/seven-judges/result.json verification/seven-judges/test-log.txt
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record actual native seven-judge core test result'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Fail run if checks did not pass
+        shell: python
+        run: |
+          import json, sys
+          with open('verification/seven-judges/result.json') as f:
+              result = json.load(f)
+          sys.exit(0 if result['status'] == 'passed' else 1)
