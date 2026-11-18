@@ -68,7 +68,7 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             COMPILER_INDEX_STORE_ENABLE=NO \
             build | tee build_log.txt
-          test -d "build/DerivedData/Build/Products/Release-iphoneos/BOTBJudgesEdition.app"
+          test -d "build/DerivedData/Build/Products/Release-iphoneos/BOTB Judges Edition.app"
 
       - name: Package and verify unsigned IPA
         run: |
