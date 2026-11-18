@@ -1,0 +1,21 @@
+{
+  "source_commit": "a411473c319b23f51674127de805ccbd8e79cb89",
+  "step_outcomes": {
+    "python_checks": "success",
+    "core_checks": "success",
+    "toolchain": "success",
+    "generate": "success",
+    "ios_build": "success",
+    "package": "success",
+    "ipa_upload": "success"
+  },
+  "status": "passed",
+  "scope": "Standalone seven-judge app only",
+  "iphone_runtime_test": "NOT PERFORMED",
+  "original_large_ipa_integration": "NOT PERFORMED",
+  "ipa_bytes": 175602,
+  "ipa_sha256": "8d0f16276adfa0ff079f755923f6d8f844831caea58261a14f794f95b2ec0181",
+  "bundle_id": "com.botb.judges.edition",
+  "version": "1.1.0",
+  "executable_magic_hex": "cffaedfe"
+}
