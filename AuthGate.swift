@@ -111,18 +111,18 @@ enum Keychain {
         SecItemDelete([String(kSecClass): kSecClassGenericPassword,
                        String(kSecAttrService): service,
                        String(kSecAttrAccount): account] as CFDictionary)
-        let attrs: [String: Any] = [kSecClass: kSecClassGenericPassword,
-                                    kSecAttrService: service,
-                                    kSecAttrAccount: account,
+        let attrs: [String: Any] = [String(kSecClass): kSecClassGenericPassword,
+                                    String(kSecAttrService): service,
+                                    String(kSecAttrAccount): account,
                                     String(kSecValueData): data,
                                     String(kSecAttrAccessible): kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
         return SecItemAdd(attrs as CFDictionary, nil) == errSecSuccess
     }
 
     static func load(account: String) -> Data? {
-        let query: [String: Any] = [kSecClass: kSecClassGenericPassword,
-                                    kSecAttrService: service,
-                                    kSecAttrAccount: account,
+        let query: [String: Any] = [String(kSecClass): kSecClassGenericPassword,
+                                    String(kSecAttrService): service,
+                                    String(kSecAttrAccount): account,
                                     String(kSecReturnData): true,
                                     String(kSecMatchLimit): kSecMatchLimitOne]
         var item: CFTypeRef?
@@ -131,9 +131,9 @@ enum Keychain {
     }
 
     static func delete(account: String) {
-        SecItemDelete([kSecClass: kSecClassGenericPassword,
-                       kSecAttrService: service,
-                       kSecAttrAccount: account] as CFDictionary)
+        SecItemDelete([String(kSecClass): kSecClassGenericPassword,
+                       String(kSecAttrService): service,
+                       String(kSecAttrAccount): account] as CFDictionary)
     }
 }
 
