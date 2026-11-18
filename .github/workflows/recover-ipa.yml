@@ -1,0 +1,67 @@
+name: Recover and inspect original split IPA
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/recover-ipa.yml', 'BotbIPA.part-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reassemble exact original bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p recovery
+          : > recovery/BOTB_original_reassembled.ipa
+          for i in $(seq 0 9); do
+            printf -v part 'BotbIPA.part-%03d' "$i"
+            test -s "$part"
+            cat "$part" >> recovery/BOTB_original_reassembled.ipa
+          done
+          sha256sum BotbIPA.part-* > recovery/PART_SHA256.txt
+          sha256sum recovery/BOTB_original_reassembled.ipa > recovery/IPA_SHA256.txt
+      - name: Inspect IPA and project ZIP without executing their content
+        shell: python
+        run: |
+          import json, pathlib, plistlib, zipfile
+          root = pathlib.Path('recovery')
+          ipa = root / 'BOTB_original_reassembled.ipa'
+          report = {'ipa_bytes': ipa.stat().st_size, 'modified': False, 'seven_judge_integration': 'NOT PERFORMED', 'signing': 'UNCHANGED - original signatures preserved; not asserted unsigned'}
+          with zipfile.ZipFile(ipa) as z:
+              bad = z.testzip()
+              if bad:
+                  raise RuntimeError('Corrupt ZIP entry: ' + bad)
+              names = z.namelist()
+              (root / 'IPA_ENTRIES.txt').write_text('\n'.join(names))
+              report['bundles'] = {}
+              for name in names:
+                  if name.startswith('Payload/') and name.endswith('.app/Info.plist') and name.count('/') == 2:
+                      p = plistlib.loads(z.read(name))
+                      report['bundles'][name] = {k: p.get(k) for k in ['CFBundleIdentifier', 'CFBundleExecutable', 'CFBundleShortVersionString', 'MinimumOSVersion']}
+              if not report['bundles']:
+                  raise RuntimeError('No main app Info.plist found')
+              report['source_entries'] = [n for n in names if n.endswith(('.swift', '.m', '.mm', '.pbxproj', 'Package.swift'))]
+          project_zip = pathlib.Path('botb-judges-edition-repo.zip')
+          if project_zip.exists():
+              with zipfile.ZipFile(project_zip) as z:
+                  bad = z.testzip()
+                  if bad:
+                      raise RuntimeError('Corrupt project ZIP: ' + bad)
+                  (root / 'PROJECT_ZIP_ENTRIES.txt').write_text('\n'.join(z.namelist()))
+          (root / 'INSPECTION.json').write_text(json.dumps(report, indent=2))
+          print(json.dumps(report, indent=2))
+          with open(__import__('os').environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('## Original IPA recovery\n```json\n' + json.dumps(report, indent=2) + '\n```\nThis artifact restores the original IPA only. Seven-judge integration has not been performed.\n')
+      - name: Upload recovered original IPA and inspection evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BOTB_original_recovered_and_inspected
+          path: recovery/
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 30
