@@ -29,6 +29,23 @@ jobs:
           xcodebuild -version
           swift --version
 
+      - name: Reassemble BOTB IPA parts and verify archive
+        run: |
+          set -euo pipefail
+          parts=(BotbIPA.part-*)
+          test "${#parts[@]}" -eq 10
+          expected=0
+          for p in "${parts[@]}"; do
+            test -s "$p"
+            expected=$((expected + $(stat -f%z "$p")))
+          done
+          cat BotbIPA.part-* > BOTB_reassembled_reference.ipa
+          actual=$(stat -f%z BOTB_reassembled_reference.ipa)
+          test "$actual" -eq "$expected"
+          unzip -t BOTB_reassembled_reference.ipa
+          echo "Reassembled reference IPA: $actual bytes"
+          shasum -a 256 BOTB_reassembled_reference.ipa | tee BOTB_reference_SHA256.txt
+          rm -f BOTB_reassembled_reference.ipa
       - name: Run Python regression tests
         run: python3 -m unittest discover -s . -p "test_*.py" -v
 
