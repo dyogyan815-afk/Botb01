@@ -1,0 +1,18 @@
+{
+  "status": "expected_reports_read_successfully",
+  "source": "user_shared_drive_zip",
+  "report_claims_independently_verified_against_ipa": false,
+  "seven_judge_binary_integration": "NOT PERFORMED",
+  "reported_ipa_bytes": 234949345,
+  "reported_bundles": [
+    {
+      "CFBundleIdentifier": "com.botb.winacar",
+      "CFBundleShortVersionString": "3.1.90",
+      "MinimumOSVersion": "16.1"
+    }
+  ],
+  "reported_ipa_source_entry_count": 0,
+  "project_zip_entry_count": 57,
+  "project_zip_swift_file_count": 9,
+  "project_zip_xcode_project_file_count": 0
+}
