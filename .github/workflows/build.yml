@@ -46,6 +46,7 @@ jobs:
           echo "Reassembled reference IPA: $actual bytes"
           shasum -a 256 BOTB_reassembled_reference.ipa | tee BOTB_reference_SHA256.txt
           rm -f BOTB_reassembled_reference.ipa
+
       - name: Run Python regression tests
         run: python3 -m unittest discover -s . -p "test_*.py" -v
 
@@ -73,17 +74,19 @@ jobs:
       - name: Package and verify unsigned IPA
         run: |
           set -euo pipefail
-          APP="build/DerivedData/Build/Products/Release-iphoneos/BOTBJudgesEdition.app"
+          APP="build/DerivedData/Build/Products/Release-iphoneos/BOTB Judges Edition.app"
           plutil -lint "$APP/Info.plist"
           BID=$(plutil -extract CFBundleIdentifier raw "$APP/Info.plist")
           VER=$(plutil -extract CFBundleShortVersionString raw "$APP/Info.plist")
           test "$BID" = "com.botb.judges.edition"
           echo "Bundle ID: $BID"
           echo "Version: $VER"
+          rm -rf Payload
           mkdir -p Payload
           cp -R "$APP" Payload/
           /usr/bin/zip -qry BOTB_Judges_Edition_unsigned.ipa Payload
           rm -rf Payload
+          test -s BOTB_Judges_Edition_unsigned.ipa
           unzip -t BOTB_Judges_Edition_unsigned.ipa
           shasum -a 256 BOTB_Judges_Edition_unsigned.ipa | tee IPA_SHA256.txt
 
